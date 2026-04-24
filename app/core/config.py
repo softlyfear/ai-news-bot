@@ -19,17 +19,17 @@ class DatabaseSettings(BaseModel):
     USER: SecretStr
     PASSWORD: SecretStr
     HOST: SecretStr
-    PORT: int
+    PORT: int = 5432
     NAME: SecretStr
 
-    ECHO: bool
-    POOL_SIZE: int
-    MAX_OVERFLOW: int
-    POOL_PRE_PING: bool
-    POOL_RECYCLE: int
+    ECHO: bool = True
+    POOL_SIZE: int = 5
+    MAX_OVERFLOW: int = 10
+    POOL_PRE_PING: bool = True
+    POOL_RECYCLE: int = 300
 
-    AUTOFLUSH: bool
-    EXPIRE_ON_COMMIT: bool
+    AUTOFLUSH: bool = False
+    EXPIRE_ON_COMMIT: bool = False
 
     @property
     def DATABASE_URL(self) -> str:
@@ -55,11 +55,38 @@ class BotSecret(BaseModel):
         return self.BOT_TOKEN.get_secret_value()
 
 
+class GptSecret(BaseModel):
+    """ChatGpt api configuration."""
+
+    API_TOKEN: SecretStr
+
+    @property
+    def get_gpt_token(self) -> str:
+        """Get chat gpt token as string."""
+        return self.API_TOKEN.get_secret_value()
+
+
+class LoguruSettings(BaseModel):
+    """Loguru log level settings."""
+
+    LEVEL_CONSOLE: str = "INFO"
+    LEVEL_FILE: str = "DEBUG"
+    FILE_PATH: str = "logs/app.log"
+    ROTATION: str = "1 week"
+    RETENTION: str = "30 days"
+    ENQUEUE: bool = True
+    JSON: bool = False
+    BACKTRACE: bool = False
+    DIAGNOSE: bool = False
+
+
 class Settings(BaseSettings):
     """All settings for import."""
 
     db: DatabaseSettings
     tg: BotSecret
+    gpt: GptSecret
+    log: LoguruSettings
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",
