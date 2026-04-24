@@ -4,6 +4,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from pydantic import BaseModel
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings
 from pydantic_settings import SettingsConfigDict
 from sqlalchemy.engine import URL
@@ -15,11 +16,11 @@ class DatabaseSettings(BaseModel):
     """Database connection and pool configuration."""
 
     DRIVER: str = "postgresql+asyncpg"
-    USER: str
-    PASSWORD: str
-    HOST: str
+    USER: SecretStr
+    PASSWORD: SecretStr
+    HOST: SecretStr
     PORT: int
-    NAME: str
+    NAME: SecretStr
 
     ECHO: bool
     POOL_SIZE: int
@@ -35,18 +36,23 @@ class DatabaseSettings(BaseModel):
         """Construct PostgreSQL connection URL."""
         return URL.create(
             drivername=self.DRIVER,
-            username=self.USER,
-            password=self.PASSWORD,
-            host=self.HOST,
+            username=self.USER.get_secret_value(),
+            password=self.PASSWORD.get_secret_value(),
+            host=self.HOST.get_secret_value(),
             port=self.PORT,
-            database=self.NAME,
+            database=self.NAME.get_secret_value(),
         ).render_as_string(hide_password=False)
 
 
 class BotSecret(BaseModel):
     """Telegram bot configuration."""
 
-    BOT_TOKEN: str
+    BOT_TOKEN: SecretStr
+
+    @property
+    def bot_token_str(self) -> str:
+        """Get bot token as string."""
+        return self.BOT_TOKEN.get_secret_value()
 
 
 class Settings(BaseSettings):
