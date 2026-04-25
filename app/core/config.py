@@ -80,6 +80,12 @@ class LoguruSettings(BaseModel):
     DIAGNOSE: bool = False
 
 
+class AppSettings(BaseModel):
+    """Application settings."""
+
+    VERSION: str
+
+
 class Settings(BaseSettings):
     """All settings for import."""
 
@@ -87,6 +93,7 @@ class Settings(BaseSettings):
     tg: BotSecret
     gpt: GptSecret
     log: LoguruSettings
+    app: AppSettings
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",
@@ -95,7 +102,7 @@ class Settings(BaseSettings):
     )
 
 
-@lru_cache
+@lru_cache(maxsize=1)
 def get_settings() -> Settings:
     """Lazy settings getter."""
     return Settings()  # pyright: ignore[reportCallIssue]

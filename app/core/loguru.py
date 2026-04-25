@@ -10,7 +10,7 @@ from app.core.config import get_settings
 settings = get_settings()
 
 
-@lru_cache
+@lru_cache(maxsize=1)
 def setup_loguru():
     """Logger configuration."""
 
