@@ -22,7 +22,7 @@ async def lifespan(app: FastAPI):
     async with session_factory() as session:
         await check_database(session)
 
-    logger.info("App started, logs are working.")
+    logger.info("App started, services are working.")
 
     try:
         yield

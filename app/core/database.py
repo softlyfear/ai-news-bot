@@ -40,13 +40,14 @@ def get_async_session_factory() -> async_sessionmaker[AsyncSession]:
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession]:
-    """Provide database session with automatic rollback on error."""
+    """Provide session with automatic commit on success and rollback on error."""
 
     session_factory = get_async_session_factory()
 
     async with session_factory() as session:
         try:
             yield session
+            await session.commit()
         except Exception as e:
             await session.rollback()
             logger.bind(
